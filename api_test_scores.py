@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 19 17:11:28 2018
-
-@author: odomanska
-"""
 
 # Imports the Google Cloud client library
 from google.cloud import language
@@ -32,9 +25,3 @@ with open('reviews_kindle_test_set.csv', 'r') as csvfile:
 with open('result.csv', 'w') as file_handler:
     for item in scores:
         file_handler.write("{}\n".format(item))
-
-# mylist = dir()
-# with open('filename.txt','w') as f:
-#    f.write( ','.join( mylist ) )     
-        
-        
