@@ -6,9 +6,6 @@ library(RTextTools)
 
 ## Sentiment analysis for Kindle product review 
 
-# setwd("~/Documents/Work/projects/Article_sentiment_analysis")
-
-
 ### Step 1. Exploring and preparing the data
 
 ## Loading data
@@ -52,7 +49,7 @@ str(train_sample)
 review_dtm_train <- review_dtm[train_sample, ]
 review_dtm_test <- review_dtm[- train_sample, ]
 
-### Basic lexicon-based approach (3 levels: negative, neutral, positive)
+### Basic approach (3 levels: negative, neutral, positive)
 
 rating_basic <- vector()
 for (i in 1:16033){
@@ -114,8 +111,6 @@ recall_accuracy(review_test_pred2, review_test_labels)
 
 set.seed(1)
 
-#train_sample <- sample(16033, 10000)
-
 test_sample <- 1:16033
 test_sample <- test_sample[-train_sample]
 
@@ -127,10 +122,10 @@ container = create_container(review_dtm, reviews$Rating,
 review_dtm <- create_matrix(reviews$Review, language="english", removeNumbers=TRUE,
                                            stemWords=TRUE, removeSparseTerms=.998)
 
-#train the model with multiple machine learning algorithms:
+#train the model with SVM machine learning algorithm:
 SVM <- train_model(container,"SVM")
 
-#classify the testing set using the trained models.
+#classify the testing set using the trained model.
 SVM_CLASSIFY <- classify_model(container, SVM)
 
 # accuracy table
@@ -145,7 +140,23 @@ r <- reviews[test_sample, 2]
 str(r)
 write.csv(r, file = "data/reviews_kindle_test_set.csv", fileEncoding="UTF-8")
 
+# Next we applied Goole NL algorithm to obtain the sentiment scores for every review in the 
+# test set. We got the resulted scores in a 'result.csv' file
 
+## Loading data
 
+GNL_scores <- read.csv('data/result.csv')
 
+names(GNL_scores) <- 'scores'
 
+scores_basic <- vector()
+for (i in 1:6033){
+  if (GNL_scores$scores[i] < -0.25){scores_basic[i] = "negative"}
+  else if (GNL_scores$scores[i] <= 0.25) {scores_basic[i] = "neutral"}
+  else {scores_basic[i] = "positive"}
+}
+
+GNL_scores$scores <- scores_basic
+table(GNL_scores$scores, review_test_labels)
+recall_accuracy(GNL_scores$scores, review_test_labels)
+CrossTable(GNL_scores$scores, review_test_labels, prop.chisq = FALSE, prop.t = FALSE, prop.r = FALSE, dnn = c('predicted', 'actual'))
